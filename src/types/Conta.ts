@@ -1,51 +1,54 @@
-import { Transacao } from "./Transacao.js";
-import { TipoTransacao } from "./TipoTransacao.js";
 import { GrupoTransacao } from "./GrupoTransacao.js";
+import { TipoTransacao } from "./TipoTransacao.js";
+import { Transacao } from "./Transacao.js";
 
-let saldo: number = JSON.parse(localStorage.getItem("saldo")) || 0;
+export class Conta
+{
+    private nome: string
+    private saldo: number = JSON.parse(localStorage.getItem("saldo")) || 0;
+    private transacao: Transacao[] = JSON.parse(localStorage.getItem("transacao"), (key:string, value: any) =>{
+        if(key === "data"){
+            return new Date(value);
+        }
+        return value;
+    }) || []
 
-const transacao: Transacao[] = JSON.parse(localStorage.getItem("transacoes"), (key: string, value: string) =>{
-    if(key =="data"){
-        return new Date(value)
-    }
-    return value
-}) || [];
 
-function debitar(valor:number) :void {
-    if(valor <= 0){
-        throw new Error("O valor a ser debitado tem que ser maior que zero");
-    }
-
-    if(valor >= saldo){
-        throw new Error("Saldo insuficiente");
-    }
-
-    saldo -= valor
-    localStorage.setItem("saldo",saldo.toString())
-}
-
-function depositar(valor:number) :void {
-    if(valor <= 0){
-        throw new Error("O valor a Depositado tem que ser maior que zero");
+    constructor(nome: string){
+        this.nome = nome
     }
 
-    saldo += valor
-    localStorage.setItem("saldo",saldo.toString())
+    public getTutular() : string
+    {
+        return this.nome
+    }
 
-}
+    public debitar(valor:number) :void {
+        if(valor <= 0){
+            throw new Error("O valor a ser debitado tem que ser maior que zero");
+        }
+    
+        if(valor >= this.saldo){
+            throw new Error("Saldo insuficiente");
+        }
+    
+        this.saldo -= valor
+        localStorage.setItem("saldo",this.saldo.toString())
+    }
+    
+    public depositar(valor:number) :void {
+        if(valor <= 0){
+            throw new Error("O valor a Depositado tem que ser maior que zero");
+        }
+    
+        this.saldo += valor
+        localStorage.setItem("saldo",this.saldo.toString())
+    
+    }
 
-const Conta = {
-    getSaldo() {
-        return saldo;
-    },
-
-    getDataAcesso(): Date {
-        return new Date();
-    },
-
-    getGrupoTransacao(): GrupoTransacao[]{
+    public getGrupoTransacao(): GrupoTransacao[]{
         const gruposTranzacoes: GrupoTransacao[] = []
-        const listaTransacao:Transacao[] = structuredClone(transacao);
+        const listaTransacao:Transacao[] = structuredClone(this.transacao);
         const transacaoOrdenada: Transacao[] = listaTransacao.sort((t1, t2) => t2.data.getTime() - t1.data.getTime())
         let labelAtualGrupoTransacao: string = "";
 
@@ -61,23 +64,31 @@ const Conta = {
             gruposTranzacoes.at(-1).transacoes.push(transacao)
         }
         return gruposTranzacoes
-    },
+    }
 
-    registrarTransacao(novaTransacao: Transacao): void {
+    public getSaldo() {
+        return this.saldo;
+    }
+
+    public getDataAcesso(): Date {
+        return new Date();
+    }
+
+    public registrarTransacao(novaTransacao: Transacao): void {
         if (novaTransacao.tipoTransacao == TipoTransacao.DEPOSITO) {
-            depositar(novaTransacao.valor)
+
+            this.depositar(novaTransacao.valor)
         } 
         else if (novaTransacao.tipoTransacao == TipoTransacao.TRANSFERENCIA || novaTransacao.tipoTransacao == TipoTransacao.PAGAMENTO_BOLETO) {
-            debitar(novaTransacao.valor)
+            this.debitar(novaTransacao.valor)
         } 
         else {
             alert("Tipo de Transação é inválido!");
             return;
         }
-        transacao.push(novaTransacao)
+        this.transacao.push(novaTransacao)
         console.log(this.getGrupoTransacao());
-        localStorage.setItem("transacoes", JSON.stringify(transacao))
+        localStorage.setItem("transacoes", JSON.stringify(this.transacao))
     }
-}
 
-export default Conta;
+}
