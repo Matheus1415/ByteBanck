@@ -1,3 +1,4 @@
+import { Armazenador } from "./Armazendor.js";
 import { GrupoTransacao } from "./GrupoTransacao.js";
 import { TipoTransacao } from "./TipoTransacao.js";
 import { Transacao } from "./Transacao.js";
@@ -5,7 +6,7 @@ import { Transacao } from "./Transacao.js";
 export class Conta
 {
     private nome: string
-    private saldo: number = JSON.parse(localStorage.getItem("saldo")) || 0;
+    private saldo: number = Armazenador.Obter("saldo");
     private transacao: Transacao[] = JSON.parse(localStorage.getItem("transacao"), (key:string, value: any) =>{
         if(key === "data"){
             return new Date(value);
