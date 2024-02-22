@@ -34,7 +34,7 @@ export class Conta
         }
     
         this.saldo -= valor
-        localStorage.setItem("saldo",this.saldo.toString())
+        Armazenador.salvar("saldo",this.saldo.toString())
     }
     
     public depositar(valor:number) :void {
@@ -43,7 +43,7 @@ export class Conta
         }
     
         this.saldo += valor
-        localStorage.setItem("saldo",this.saldo.toString())
+        Armazenador.salvar("saldo",this.saldo.toString())
     
     }
 
@@ -89,7 +89,7 @@ export class Conta
         }
         this.transacao.push(novaTransacao)
         console.log(this.getGrupoTransacao());
-        localStorage.setItem("transacoes", JSON.stringify(this.transacao))
+        Armazenador.salvar("transacoes", JSON.stringify(this.transacao))
     }
 
 }
